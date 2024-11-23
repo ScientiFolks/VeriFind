@@ -110,7 +110,7 @@ function Find() {
     };
 
     const LiteratureItem = ({ title, link, summary }) => (
-        <div className="mb-8">
+        <div className="mb-12">
             <h3 className="text-2xl font-bold text-yellow-fig hover:text-gray-2">
                 <a href={link} target="_blank" rel="noopener noreferrer">{title}</a>
             </h3>
