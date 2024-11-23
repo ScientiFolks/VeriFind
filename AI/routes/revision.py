@@ -6,5 +6,6 @@ revision_service = RevisionService()
 
 @revision_router.post("/pdf")
 async def revise_pdf(file:UploadFile):
-    doc = await revision_service.load_document(file)
+    responses = await revision_service.revise_document(file)
+    print(responses)
     return {"status": status.HTTP_200_OK, "data": "Document added successfully!"}
