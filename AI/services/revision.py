@@ -48,7 +48,7 @@ class RevisionService:
         
         return {
             "summary": suggestion_summary.content,
-            "suggestions": suggestions
+            "suggestions": responses
         }
     
     async def revise_statement(self, statement: str) -> str:
