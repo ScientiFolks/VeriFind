@@ -51,7 +51,8 @@ function VerifyInputText() {
       fileInputRef.current.value = '';
     };
   
-    const handleVerify = () => {
+    const handleVerify = (e) => {
+        e.preventDefault();
       if (isUploaded) {
         // Implement your verification logic here
         setIsVerified(true);
@@ -62,7 +63,7 @@ function VerifyInputText() {
     };
   
     return (
-      <div className="flex flex-col items-center w-full">
+      <form className="flex flex-col items-center w-full" onSubmit={handleVerify}>
         <div className="flex justify-center items-center gap-6 w-full mb-5">
           <textarea
             ref={textareaRef}
@@ -72,13 +73,14 @@ function VerifyInputText() {
             className={`min-h-[40px] w-10/12 p-4 border border-gray-300 rounded-3xl resize-none overflow-hidden focus:outline-none focus:ring-2 focus:ring-yellow-fig ${
               isUploaded ? 'bg-gray-100' : ''
             }`}
-            placeholder="Type your message..."
+            placeholder="Type your statements..."
             readOnly={isUploaded}
           />
           
           {!isUploaded ? (
             <button
               onClick={handleUploadClick}
+              type='button'
               className="p-3 flex justify-center bg-gray-100 rounded-2xl hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               title="Upload PDF"
             >
@@ -100,6 +102,7 @@ function VerifyInputText() {
           ) : (
             <button
               onClick={handleCancelUpload}
+              type='button'
               className="p-3 flex justify-center bg-red-100 rounded-2xl hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-500"
               title="Cancel Upload"
             >
@@ -128,7 +131,6 @@ function VerifyInputText() {
           />
         </div>
         <button
-          onClick={handleVerify}
           className={`mt-2 p-2 rounded-3xl min-w-44 w-72 focus:outline-none focus:ring-2 focus:ring-green-500 ${
             text.trim().length !== 0
               ? 'bg-green-500 text-white hover:bg-green-600'
@@ -136,9 +138,9 @@ function VerifyInputText() {
           }`}
           disabled={!isUploaded}
         >
-          {isVerified ? 'Verified' : 'Verify'}
+          Verify
         </button>
-      </div>
+      </form>
     );
 }
 
