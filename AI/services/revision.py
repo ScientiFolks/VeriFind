@@ -1,5 +1,6 @@
 from fastapi import UploadFile
 from models.revision import RevisionAgent
+from typing import List
 import pymupdf
 
 class RevisionService:
@@ -15,7 +16,7 @@ class RevisionService:
         document = pymupdf.Document(stream=contents, filetype="pdf")
         return document
     
-    async def revise_document_writing(self, document: pymupdf.Document): 
+    async def revise_document_writing(self, document: pymupdf.Document) -> List[dict]: 
         """
             Give suggestions to improve the document writing
         """
@@ -31,7 +32,7 @@ class RevisionService:
         
         return responses
     
-    async def revise_document(self, file: UploadFile):
+    async def revise_document(self, file: UploadFile) -> dict:
         """
             Give suggestions to revise the document from content validity and writing aspect
         """
@@ -50,3 +51,10 @@ class RevisionService:
             "suggestions": suggestions
         }
     
+    async def revise_statement(self, statement: str) -> str:
+        """
+            Give suggestions to revise the statement from content validity and writing aspect
+        """
+        suggestions = self.revision_agent.revise_document(statement)
+
+        return suggestions.content
