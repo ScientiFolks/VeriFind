@@ -38,4 +38,15 @@ class RevisionService:
         document = await self.load_document(file)
         responses = await self.revise_document_writing(document)
 
-        return responses
+        suggestions = ""
+
+        for response in responses:
+            suggestions += (f"\n\n Page {response['page_id']+1} \n  {response['suggestions']}")
+
+        suggestion_summary = self.revision_agent.summary_suggestion(suggestions)
+        
+        return {
+            "summary": suggestion_summary.content,
+            "suggestions": suggestions
+        }
+    
