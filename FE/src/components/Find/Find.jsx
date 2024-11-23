@@ -8,6 +8,7 @@ function Find() {
     const [resultCount, setResultCount] = useState(5);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [searchResults, setSearchResults] = useState([]);
 
     const handleInputChange = (e) => {
         setSearchText(e.target.value);
@@ -43,6 +44,61 @@ function Find() {
             // Handle search query to backend
             console.log('Searching for:', searchText);
             console.log('Show total results:', resultCount);
+
+            // Simulated search results
+            const results = [
+                {
+                title: "Literature Review and Document Refinement: Ensuring Accuracy and Relevance",
+                link: "https://example.com/literature-review",
+                summary: "This article discusses techniques for validating sources and revising documents to enhance research quality."
+                },
+                {
+                title: "Improving Research Quality: Literature Validation and Document Revision Techniques",
+                link: "https://example.com/research-quality",
+                summary: "An in-depth look at methods for ensuring research integrity through comprehensive validation of literature and revision of academic documents."
+                },
+                {
+                title: "VeriDraft: An Intelligent Assistant for Validating Sources and Revising Drafts",
+                link: "https://example.com/veridraft",
+                summary: "VeriDraft is a smart platform that helps researchers validate literature sources and refine their document drafts."
+                },
+                {
+                title: "Literature Review and Document Refinement: Ensuring Accuracy and Relevance",
+                link: "https://example.com/literature-review",
+                summary: "This article discusses techniques for validating sources and revising documents to enhance research quality."
+                },
+                {
+                title: "Improving Research Quality: Literature Validation and Document Revision Techniques",
+                link: "https://example.com/research-quality",
+                summary: "An in-depth look at methods for ensuring research integrity through comprehensive validation of literature and revision of academic documents."
+                },
+                {
+                title: "VeriDraft: An Intelligent Assistant for Validating Sources and Revising Drafts",
+                link: "https://example.com/veridraft",
+                summary: "VeriDraft is a smart platform that helps researchers validate literature sources and refine their document drafts."
+                },
+                {
+                title: "Literature Review and Document Refinement: Ensuring Accuracy and Relevance",
+                link: "https://example.com/literature-review",
+                summary: "This article discusses techniques for validating sources and revising documents to enhance research quality."
+                },
+                {
+                title: "Improving Research Quality: Literature Validation and Document Revision Techniques",
+                link: "https://example.com/research-quality",
+                summary: "An in-depth look at methods for ensuring research integrity through comprehensive validation of literature and revision of academic documents."
+                },
+                {
+                title: "VeriDraft: An Intelligent Assistant for Validating Sources and Revising Drafts",
+                link: "https://example.com/veridraft",
+                summary: "VeriDraft is a smart platform that helps researchers validate literature sources and refine their document drafts."
+                },
+                {
+                    title: "VeriDraft: An Intelligent Assistant for Validating Sources and Revising Drafts",
+                    link: "https://example.com/veridraft",
+                    summary: "VeriDraft is a smart platform that helps researchers validate literature sources and refine their document drafts."
+                },
+            ].slice(0, resultCount);
+            setSearchResults(results);
         }, 2000); // Simulate 2 seconds loading time
     };
 
@@ -52,6 +108,26 @@ function Find() {
             handleSubmit();
         }
     };
+
+    const LiteratureItem = ({ title, link, summary }) => (
+        <div className="mb-8">
+            <h3 className="text-2xl font-bold text-yellow-fig hover:text-gray-2">
+                <a href={link} target="_blank" rel="noopener noreferrer">{title}</a>
+            </h3>
+            <p className="text-green-500 text-sm mb-1 hover:underline">
+                <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
+            </p>
+            <p className="text-gray-2">{summary}</p>
+        </div>
+    );
+        
+    const LiteratureResults = ({ results }) => (
+        <div className="mt-12 px-4 w-full">
+            {results.map((item, index) => (
+                <LiteratureItem key={index} {...item} />
+            ))}
+        </div>
+    );
 
     return (
         <div className={`flex flex-col items-center w-full transition-all duration-300 ${isSubmitted ? 'pt-4' : 'pt-8 md:pt-16'}`}>
@@ -99,6 +175,9 @@ function Find() {
                 <div className="mt-12 flex justify-center items-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-fig"></div>
                 </div>
+            )}
+            {!isLoading && isSubmitted && searchResults.length > 0 && (
+                <LiteratureResults results={searchResults} />
             )}
         </div>
     );
