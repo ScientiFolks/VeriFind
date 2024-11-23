@@ -8,5 +8,5 @@ python-multipart==0.0.17
 pytesseract>=0.3.13
 poppler-utils>=0.1.0
 Pillow>=10.1.0
-pdf2image>=1.17.0
 nltk>=3.9.1
+pypdf>=5.1.0
