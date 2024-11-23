@@ -7,6 +7,7 @@ function Find() {
     const [searchText, setSearchText] = useState('');
     const [resultCount, setResultCount] = useState(5);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleInputChange = (e) => {
         setSearchText(e.target.value);
@@ -33,10 +34,16 @@ function Find() {
         }
 
         setIsSubmitted(true);
+        setIsLoading(true);
 
-        // Handle search query to backend
-        console.log('Searching for:', searchText);
-        console.log('Show total results:', resultCount);
+        // Change this to actual backend request
+        // Simulate backend request
+        setTimeout(() => {
+            setIsLoading(false);
+            // Handle search query to backend
+            console.log('Searching for:', searchText);
+            console.log('Show total results:', resultCount);
+        }, 2000); // Simulate 2 seconds loading time
     };
 
     const handleKeyPress = (e) => {
@@ -62,13 +69,14 @@ function Find() {
                         onChange={handleInputChange}
                         onKeyDown={handleKeyPress}
                         placeholder="Search for research papers..."
-                        className="w-full px-4 py-2 pl-10 pr-4 rounded-xl border border-gray-2 focus:outline-none focus:ring-2 focus:ring-yellow-fig resize-none overflow-hidden"
+                        className="w-full px-4 py-2 pl-10 pr-4 rounded-2xl border border-gray-2 focus:outline-none focus:ring-2 focus:ring-yellow-fig resize-none overflow-hidden"
                         rows="1"
                         style={{ minHeight: '40px' }}
+                        disabled={isLoading}
                     />
                     <FaSearch 
-                        className="absolute left-3 top-3 text-gray-1 cursor-pointer" 
-                        onClick={handleSubmit}
+                        className={`absolute left-3 top-3 text-gray-1 ${isLoading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                        onClick={isLoading ? null : handleSubmit}
                     />
                 </div>
                 <div className={`flex justify-end items-center transition-all duration-300 ${isSubmitted ? 'md:mr-4' : 'w-full mt-2 md:mt-4 max-w-2xl'}`}>
@@ -76,7 +84,8 @@ function Find() {
                     <select
                         value={resultCount}
                         onChange={handleResultCountChange}
-                        className="px-2 py-1 md:px-3 md:py-2 border border-gray-2 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-fig text-sm md:text-base"
+                        className="px-2 py-1 md:px-3 md:py-2 border border-gray-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-fig text-sm md:text-base"
+                        disabled={isLoading}
                     >
                         {[...Array(10)].map((_, i) => (
                             <option key={i+1} value={i+1}>
@@ -86,6 +95,11 @@ function Find() {
                     </select>
                 </div>
             </div>
+            {isLoading && (
+                <div className="mt-12 flex justify-center items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-fig"></div>
+                </div>
+            )}
         </div>
     );
 }
