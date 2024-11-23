@@ -18,15 +18,12 @@ function App() {
           <div className="w-full mb-8">
             <ToggleButton onToggle={handleToggle} />
           </div>
-          <h1 className="text-6xl md:text-8xl font-black mb-8 bg-gradient-to-r from-gradient-1 via-gradient-2 to-gradient-3 text-transparent bg-clip-text">
-            VeriFind
-          </h1>
         </div>
-        <div className="mt-8 w-full">
+        <div className="w-full">
           {activeComponent === 'Find' ? <Find /> : <Verify />}
         </div>
       </div>
-      <footer className="mt-16 flex justify-between items-center text-gray-2 gap-4">
+      <footer className="mt-16 flex justify-between items-center text-gray-2 gap-4 md:text-base text-sm transition-all duration-300">
         <div>&copy; 2024 NumHack VeriFind.</div>
         <div>ScientiFolks</div>
       </footer>
