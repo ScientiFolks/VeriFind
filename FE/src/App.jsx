@@ -23,7 +23,7 @@ function App() {
           {activeComponent === 'Find' ? <Find /> : <Verify />}
         </div>
       </div>
-      <footer className="mt-16 flex justify-between items-center text-gray-2 gap-4 md:text-base text-sm transition-all duration-300">
+      <footer className="mt-12 flex justify-between items-center text-gray-2 gap-4 md:text-base text-sm transition-all duration-300">
         <div>&copy; 2024 NumHack VeriFind.</div>
         <div>ScientiFolks</div>
       </footer>

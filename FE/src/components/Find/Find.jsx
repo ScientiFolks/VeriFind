@@ -110,19 +110,19 @@ function Find() {
     };
 
     const LiteratureItem = ({ title, link, summary }) => (
-        <div className="mb-12">
-            <h3 className="text-2xl font-bold text-yellow-fig hover:text-gray-2">
+        <div className="mb-8 md:mb-12">
+            <h3 className="text-xl md:text-2xl font-bold text-yellow-fig hover:text-gray-2 transition-colors duration-300">
                 <a href={link} target="_blank" rel="noopener noreferrer">{title}</a>
             </h3>
-            <p className="text-green-500 text-sm mb-1 hover:underline">
+            <p className="text-green-500 text-xs md:text-sm mb-1 hover:underline">
                 <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
             </p>
-            <p className="text-gray-2">{summary}</p>
+            <p className="text-gray-2 text-sm md:text-base">{summary}</p>
         </div>
     );
-        
+    
     const LiteratureResults = ({ results }) => (
-        <div className="mt-12 px-4 w-full">
+        <div className="mt-8 md:mt-12 px-2 md:px-4 w-full max-w-full overflow-x-hidden">
             {results.map((item, index) => (
                 <LiteratureItem key={index} {...item} />
             ))}
