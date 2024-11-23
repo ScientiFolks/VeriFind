@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import './App.css'
 
 import Find from './components/Find/Find'
 import Verify from './components/Verify/Verify'
