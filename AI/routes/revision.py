@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status, HTTPException, Depends, UploadFile
-from services.revision import RevisionService
+from services import RevisionService
 
 revision_router = APIRouter()
 revision_service = RevisionService()
