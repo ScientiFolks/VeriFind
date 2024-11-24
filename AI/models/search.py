@@ -131,7 +131,7 @@ class SearchAgent():
             include_domains=include_domains,
             exclude_domains=exclude_domains,
             # name="...",            # overwrite default tool name
-            # description="...",     # overwrite default tool description
+            description="Useful for searching the web for current information on academic documents, articels, papers, journals, books and pdf ",     # overwrite default tool description
             # args_schema=...,       # overwrite default args_schema: BaseModel
         )
         
