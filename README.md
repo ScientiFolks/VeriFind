@@ -184,6 +184,14 @@ VITE_APP_API_URL=[backend-api-url]
 npm run dev
 ```
 
+Or Build The Project First To Achive Maximum Performance
+```bash
+npm run build
+```
+```bash
+npm run preview
+```
+
 ### Back End
 
 ## Dependencies
