@@ -10,7 +10,6 @@ function SuggestionsPagination({ suggestions, validationSuggestions="", showSugg
   useEffect(() => {
     setCurrentItem(suggestions[currentPage]);
     setCurrentValidation(validationSuggestions[currentPage]);
-    console.log(currentValidation);
 
   }, [currentPage]);
 
@@ -29,9 +28,6 @@ function SuggestionsPagination({ suggestions, validationSuggestions="", showSugg
   if (!showSuggestions || suggestions.length === 0) {
     return null;
   }
-
-  console.log(validationSuggestions);
-  console.log(currentValidation);
 
   return (
     <div className='mb-10'>
