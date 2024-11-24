@@ -10,6 +10,7 @@ function LiteratureDetail({ literature, onBack }) {
     const [selectedWord, setSelectedWord] = useState(null);
     const [currentMeaningIndex, setCurrentMeaningIndex] = useState(0);
     const [detailedSummary, setDetailedSummary] = useState('');
+    const [keywords, setKeywords] = useState([]);
     const [isLoadingSummary, setIsLoadingSummary] = useState(true);
     const [summaryError, setSummaryError] = useState(false);
 
@@ -23,11 +24,13 @@ function LiteratureDetail({ literature, onBack }) {
                 .filter(line => line.trim())
                 .join('\n\n');
             setDetailedSummary(formattedSummary);
+            setKeywords(result.keywords);
         } catch (error) {
             console.error('Error fetching detailed summary:', error);
             toast.error('Failed to load detailed summary');
             setSummaryError(true);
             setDetailedSummary('');
+            setKeywords([]);
         } finally {
             setIsLoadingSummary(false);
         }
@@ -36,10 +39,6 @@ function LiteratureDetail({ literature, onBack }) {
     useEffect(() => {
         fetchDetailedSummary();
     }, [literature]);
-
-    // Replace with actual api call
-    // Dummy detailed summarize for demonstration
-    const keywords = ['Machine Learning', 'Data', 'Research', 'Academic'];
 
     const handleWordClick = async (word) => {
         if (selectedWord === word) {
@@ -172,11 +171,7 @@ function LiteratureDetail({ literature, onBack }) {
             
             <div>
                 <h2 className="text-xl font-bold text-gray-2 mb-3">Detailed Summary</h2>
-                {isLoadingSummary ? (
-                    <div className="flex justify-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-yellow-fig"></div>
-                    </div>
-                ) : summaryError ? (
+                {summaryError ? (
                     <div className="bg-gray-1 rounded-3xl p-6 text-center">
                         <p className="text-gray-2 mb-4">Failed to load detailed summary</p>
                         <button
@@ -207,6 +202,12 @@ function LiteratureDetail({ literature, onBack }) {
             </div>
 
             {isLoadingWord && (
+                <div className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-yellow-fig"></div>
+                </div>
+            )}
+
+            {isLoadingSummary && (
                 <div className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-yellow-fig"></div>
                 </div>
