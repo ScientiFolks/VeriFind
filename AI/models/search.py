@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from configs import SearchConfig
 
 from langchain_community.tools import TavilySearchResults
+from langchain_community.utilities import SearxSearchWrapper
 import os
 
 
@@ -17,9 +18,10 @@ class SearchResult():
     search_results : list[dict[any]]
         A list of search results obtained from the Tavily search engine.
     """
-    def __init__(self, url: str, summarized_text: str, **kwargs):
+    def __init__(self, url: str, summarized_text: str, title:str,  **kwargs):
         self.url = url
         self.summarized_text = summarized_text
+        self.title = title
         for key, value in kwargs.items():
             setattr(self, key, value)
     
@@ -66,7 +68,7 @@ class SearchAgent():
         """
         
         print("models/search > SearchAgent::invoke_search")
-        return self.__tavily_serach(
+        return self.__searxng_search(
             query=query,
             search_template=search_template,
             max_results=max_results,
@@ -84,7 +86,27 @@ class SearchAgent():
         exclude_domains = [],
         **kwargs,
     ) -> SearchResult:
-        ...
+        
+
+        # searx_host: must hosting a searx instance on your local machine or on a server.
+        search = SearxSearchWrapper(searx_host=SearchConfig.DEFAULT_SEARX_HOST)
+
+        results = search.results(
+            f"{query} | {search_template}",
+            num_results=max_results,
+            categories=["science"],
+        )
+        
+        respon = []
+        for result in results:
+            url = result.get("link", "No URL provided")
+            content = result.get("snippet", "No content provided")
+            title = result.get("title", "No title provided")
+            respon.append(SearchResult(url=url, summarized_text=content, title=title))
+        
+        return respon
+        
+        
     
     def __tavily_serach(
         self,
