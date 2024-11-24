@@ -15,9 +15,9 @@ function App() {
     <div className="container mx-auto p-16 min-h-screen flex flex-col">
       <div className="flex-grow">
         <div className="flex flex-col items-center">
-          <div className="flex flex-row justify-between items-center w-full mb-8">
+          <div className="flex flex-row justify-between items-center w-full mb-8 gap-4">
             <ToggleButton onToggle={handleToggle} />
-            <h1 className={`font-black bg-gradient-to-r from-gradient-1 via-gradient-2 to-gradient-3 text-transparent bg-clip-text transition-all duration-300 text-4xl ${activeComponent === 'Find' && 'hidden'}`}>
+            <h1 className={`font-black bg-gradient-to-r from-gradient-1 via-gradient-2 to-gradient-3 text-transparent bg-clip-text transition-all duration-300 text-2xl md:text-4xl ${activeComponent === 'Find' && 'hidden'}`}>
                 VeriFind
             </h1>
           </div>
