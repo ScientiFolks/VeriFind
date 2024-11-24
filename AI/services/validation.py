@@ -1,30 +1,24 @@
-from models import ValidationAgent
-from io import StringIO
-from contextlib import redirect_stdout
-from langchain.agents import AgentExecutor
+from models import ValidationAgent, RevisionAgent
+from services import RevisionService
+from fastapi import UploadFile
+import pymupdf
 import re
 
-class VerboseAgentExecutor(AgentExecutor):
-    def invoke(self, inputs):
-        verbose_output = StringIO()
-        
-        # Redirect verbose output to a string
-        with redirect_stdout(verbose_output):
-            result = super().invoke(inputs)
-        
-        # Capture verbose output
-        verbose_text = verbose_output.getvalue()
-        
-        # Append verbose output to the result
-        if isinstance(result, dict) and "output" in result:
-            result["output"] += f"\n\nVerbose Output:\n{verbose_text}"
-        else:
-            result = {"output": f"Verbose Output:\n{verbose_text}"}
-        
-        return result
 
 class ValidationService:
-    def clean_output(raw_output):
+    def __init__(self) -> None:
+        self.validation_agent = ValidationAgent()
+        self.revision_service = RevisionService()
+        self.revision_agent = RevisionAgent()
+
+    async def remove_lines_before_substring(self, text, substring):
+        lines = text.splitlines()
+        for i, line in enumerate(lines):
+            if substring in line:
+                return "\n".join(lines[i:]) 
+        return text
+    
+    async def clean_output(self, raw_output):
         iterations = re.split(r"(I will analyze the document.*)", raw_output, flags=re.DOTALL)
         
         if len(iterations) > 1:
@@ -33,11 +27,34 @@ class ValidationService:
             last_iteration = raw_output
         
         cleaned_output = re.sub(r"(Action:.*|Action Input:.*|Invalid Format:.*|Thought:.*)", "", last_iteration).strip()
-        return cleaned_output.replace("> Finished chain.", "")
 
-    def remove_lines_before_substring(text, substring):
-        lines = text.splitlines()
-        for i, line in enumerate(lines):
-            if substring in line:
-                return "\n".join(lines[i:]) 
-        return text
+        final_output = self.remove_lines_before_substring(cleaned_output.replace("> Finished chain.", ""), "Comparison with Scholarly Works")
+        return final_output
+    
+    async def validate_document(self, file: UploadFile):
+        doc = await self.revision_service.load_document(file)
+        processed_pages = []
+
+        for page_id in range (doc.page_count):
+            processed_pages.append(doc.load_page(page_id).get_text())
+
+        responses = self.validation_agent.validate_document(processed_pages)
+
+        suggestions = ""
+
+        for response in responses:
+            suggestions += (f"\n\n Page {response['page_id']+1} \n  {response['suggestions']}")
+            response["suggestions"] = self.clean_output(response["suggestions"])
+
+        suggestion_summary = self.revision_agent.summary_suggestion(suggestions)
+        
+        return {
+            "summary": suggestion_summary.content,
+            "suggestions": responses
+        }
+    
+    async def validate_statement(self, statement: str) -> str:
+        response = self.validation_agent.validate_document([statement])
+        final_response = self.clean_output(response[0]["output"])
+
+        return final_response

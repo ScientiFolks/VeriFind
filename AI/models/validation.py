@@ -9,25 +9,40 @@ from langchain.agents.format_scratchpad.openai_tools import (
 from math import ceil
 from langchain_community.tools.tavily_search import TavilySearchResults
 from services import VerboseAgentExecutor, ValidationService
+from contextlib import redirect_stdout
+from langchain.agents import AgentExecutor
+from io import StringIO
+from typing import List
 
 from dotenv import load_dotenv
 
+
+class VerboseAgentExecutor(AgentExecutor):
+    def invoke(self, inputs):
+        verbose_output = StringIO()
+        
+        # Redirect verbose output to a string
+        with redirect_stdout(verbose_output):
+            result = super().invoke(inputs)
+        
+        # Capture verbose output
+        verbose_text = verbose_output.getvalue()
+        
+        # Append verbose output to the result
+        if isinstance(result, dict) and "output" in result:
+            result["output"] += f"\n\nVerbose Output:\n{verbose_text}"
+        else:
+            result = {"output": f"Verbose Output:\n{verbose_text}"}
+        
+        return result
+
 class ValidationAgent:
-    def __init__(self, data_path):
+    def __init__(self):
         # Initialize your language model
         self.llm = ChatGroq(model_name="llama3-70b-8192")
 
         load_dotenv()
 
-        self.doc = pymupdf.open(data_path)
-
-        self.processed_pages = []
-
-        self.result = None
-
-        for page_id in range (self.doc.page_count):
-            self.processed_pages.append(self.doc.load_page(page_id).get_text())
-        
         # Define your tool(s)
         self.tavily_tool = TavilySearchResults(
                                             max_results=3,
@@ -95,28 +110,26 @@ class ValidationAgent:
                 x["intermediate_steps"]
             ),})
 
-    def output_page(self):
-        batch_size = 3
-        num_batches = ceil(len(self.processed_pages) / batch_size)
+    def validate_document(self, processed_pages : List[str]) -> dict:
+        batch_size = 1
+        num_batches = ceil(len(processed_pages) / batch_size)
+        results = []
 
         for batch_index in range(num_batches):
             # Slice the pages into a batch of three
             start_index = batch_index * batch_size
             end_index = start_index + batch_size
-            page_batch = self.processed_pages[start_index:end_index]
+            page_batch = processed_pages[start_index:end_index]
             
             # Combine the pages in the batch into one text block
             batched_text = "\n".join(page_batch)
             
             # Process the batched text
-            #print(f"Processing batch {batch_index + 1} (Pages {start_index + 1} to {min(end_index, len(processed_pages))})")
-            self.result = self.processed_pages(batched_text)
-            
-            # Print the result for the batch
-            print("================================================================")
+            result = {
+                "page_id" : batch_index,
+                "suggestions" : self.process_pages(batched_text)["output"]
+            }
 
-            break
-
-    def print_final_output(self):
-        val_service = ValidationService()
-        print(val_service.remove_lines_before_substring((val_service.clean_output(self.result["output"])), "Comparison with Scholarly Works"))
+            results.append(result)
+        
+        return results
