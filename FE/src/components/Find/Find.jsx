@@ -58,17 +58,43 @@ function Find() {
         }
     };
 
-    const LiteratureItem = ({ title, url, summarized_text }) => (
-        <div className="mb-8 md:mb-12">
-            <h3 className="text-xl md:text-2xl font-bold text-yellow-fig hover:text-gray-2 transition-colors duration-300">
-                <a href={url} target="_blank" rel="noopener noreferrer">{title}</a>
-            </h3>
-            <p className="text-green-500 text-xs md:text-sm mb-1 hover:underline">
-                <a href={url} target="_blank" rel="noopener noreferrer">{url}</a>
-            </p>
-            <p className="text-gray-2 text-sm md:text-base">{summarized_text}</p>
-        </div>
-    );
+    const LiteratureItem = ({ title, url, summarized_text }) => {
+        const [isExpanded, setIsExpanded] = useState(false);
+        const maxLength = 200; // Maximum number of characters to show initially
+        
+        const toggleExpand = () => {
+            setIsExpanded(!isExpanded);
+        };
+    
+        const truncatedText = summarized_text.slice(0, maxLength);
+        const shouldTruncate = summarized_text.length > maxLength;
+    
+        return (
+            <div className="mb-8 md:mb-12">
+                <h3 className="text-xl md:text-2xl font-bold text-yellow-fig hover:text-gray-2 transition-colors duration-300">
+                    <a href={url} target="_blank" rel="noopener noreferrer">{title}</a>
+                </h3>
+                <p className="text-green-500 text-xs md:text-sm mb-1 hover:underline">
+                    <a href={url} target="_blank" rel="noopener noreferrer">{url}</a>
+                </p>
+                <div className="text-gray-2 text-sm md:text-base">
+                    <p>{isExpanded ? summarized_text : truncatedText}
+                        {shouldTruncate && (
+                            <>
+                                {!isExpanded && '...'}
+                                <button 
+                                    onClick={toggleExpand}
+                                    className="ml-2 text-yellow-fig hover:text-gray-2 font-semibold transition-colors duration-300"
+                                >
+                                    {isExpanded ? 'Show less' : 'Show more'}
+                                </button>
+                            </>
+                        )}
+                    </p>
+                </div>
+            </div>
+        );
+    };
     
     const LiteratureResults = ({ results }) => {
         const startIndex = (currentPage - 1) * 10;
