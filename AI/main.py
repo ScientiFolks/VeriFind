@@ -1,12 +1,23 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes import revision_router, search_router, validation_router, extraction_router
+from fastapi.middleware.cors import CORSMiddleware
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
+
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def read_root():
@@ -22,6 +33,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Include the revision routes
 app.include_router(revision_router, prefix="/revision", tags=["revision"])
