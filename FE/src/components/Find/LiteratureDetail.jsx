@@ -1,16 +1,45 @@
-import React, { useState } from 'react';
-import { FaArrowLeft, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaArrowLeft, FaChevronLeft, FaChevronRight, FaRedo } from 'react-icons/fa';
+import { getDetailedSummary } from '../../services/api';
+import { toast } from 'react-toastify';
+import ReactMarkdown from 'react-markdown';
 
 function LiteratureDetail({ literature, onBack }) {
     const [wordMeanings, setWordMeanings] = useState({});
     const [isLoadingWord, setIsLoadingWord] = useState(false);
     const [selectedWord, setSelectedWord] = useState(null);
     const [currentMeaningIndex, setCurrentMeaningIndex] = useState(0);
+    const [detailedSummary, setDetailedSummary] = useState('');
+    const [isLoadingSummary, setIsLoadingSummary] = useState(true);
+    const [summaryError, setSummaryError] = useState(false);
+
+    const fetchDetailedSummary = async () => {
+        setIsLoadingSummary(true);
+        setSummaryError(false);
+        try {
+            const result = await getDetailedSummary(literature.url, literature.title);
+            const formattedSummary = result.summary
+                .split('\n')
+                .filter(line => line.trim())
+                .join('\n\n');
+            setDetailedSummary(formattedSummary);
+        } catch (error) {
+            console.error('Error fetching detailed summary:', error);
+            toast.error('Failed to load detailed summary');
+            setSummaryError(true);
+            setDetailedSummary('');
+        } finally {
+            setIsLoadingSummary(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchDetailedSummary();
+    }, [literature]);
 
     // Replace with actual api call
-    // Dummy keywords & detailed summarize for demonstration
+    // Dummy detailed summarize for demonstration
     const keywords = ['Machine Learning', 'Data', 'Research', 'Academic'];
-    const detailed_summary = "This is a detailed summary of the literature. It should be a long text that describes the literature in detail. This is a detailed summary of the literature. It should be a long text that describes the literature in detail. This is a detailed summary of the literature. It should be a long text that describes the literature in detail. This is a detailed summary of the literature. It should be a long text that describes the literature in detail. This is a detailed summary of the literature. It should be a long text that describes the literature in detail. This is a detailed summary of the literature. It should be a long text that describes the literature in detail. This is a detailed summary of the literature. It should be a long text that describes the literature in detail. This is a detailed summary of the literature. It should be a long text that describes the literature in detail.";
 
     const handleWordClick = async (word) => {
         if (selectedWord === word) {
@@ -143,9 +172,38 @@ function LiteratureDetail({ literature, onBack }) {
             
             <div>
                 <h2 className="text-xl font-bold text-gray-2 mb-3">Detailed Summary</h2>
-                <p className="text-gray-2 text-sm md:text-base leading-relaxed text-justify">
-                    {detailed_summary}
-                </p>
+                {isLoadingSummary ? (
+                    <div className="flex justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-yellow-fig"></div>
+                    </div>
+                ) : summaryError ? (
+                    <div className="bg-gray-1 rounded-3xl p-6 text-center">
+                        <p className="text-gray-2 mb-4">Failed to load detailed summary</p>
+                        <button
+                            onClick={fetchDetailedSummary}
+                            className="flex items-center justify-center gap-2 mx-auto px-4 py-2 bg-yellow-fig text-white rounded-full hover:bg-opacity-90 transition-colors duration-300"
+                        >
+                            <FaRedo className="w-4 h-4" />
+                            Retry
+                        </button>
+                    </div>
+                ) : (
+                    <div className="prose prose-sm md:prose-base text-gray-2 text-justify">
+                        <ReactMarkdown
+                            components={{
+                                strong: ({node, ...props}) => <span className="font-bold text-yellow-fig" {...props} />,
+                                em: ({node, ...props}) => <span className="italic text-gray-2" {...props} />,
+                                h3: ({node, ...props}) => <h3 className="text-lg font-bold text-gray-2 mt-4" {...props} />,
+                                p: ({node, ...props}) => <p className="mb-4" {...props} />,
+                                ul: ({node, ...props}) => <ul className="list-disc ml-4 mb-4" {...props} />,
+                                ol: ({node, ...props}) => <ol className="list-decimal ml-4 mb-4" {...props} />,
+                                li: ({node, ...props}) => <li className="mb-2" {...props} />
+                            }}
+                        >
+                            {detailedSummary}
+                        </ReactMarkdown>
+                    </div>
+                )}
             </div>
 
             {isLoadingWord && (

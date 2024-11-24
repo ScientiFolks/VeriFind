@@ -12,7 +12,7 @@ export const searchLiterature = async (query, maxResults) => {
       )}&max_results=${maxResults}`
     );
 
-    if (response.data.status === 200 && response.data) {
+    if (response.status === 200 && response.data) {
       return response.data;
     } else {
       throw new Error("Error fetching search results");
@@ -23,6 +23,23 @@ export const searchLiterature = async (query, maxResults) => {
   }
 };
 
+export const getDetailedSummary = async (url, title) => {
+  try {
+    const response = await api.post('/extraction/summarize-extraction', {
+      url,
+      title
+    });
+
+    if (response.status === 200 && response.data) {
+      return response.data;
+    } else {
+      throw new Error("Error fetching detailed summary");
+    }
+  } catch (error) {
+    console.error('Error fetching detailed summary:', error);
+    throw error;
+  }
+};
 
 export const verifyDocument = async (document) => {
   try {
@@ -55,7 +72,7 @@ export const verifyStatement = async (statement) => {
     const url = `/revision/statement?${params.toString()}`;
     const response = await api.post(url);
 
-    if (response.data.status === 200 && response.data) {
+    if (response.status === 200 && response.data) {
       return response.data;
     } else {
       throw new Error("Error sending statement to PDF endpoint");
