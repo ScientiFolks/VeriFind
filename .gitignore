@@ -9,3 +9,5 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+/FE/node_modules
+/FE/.vite
