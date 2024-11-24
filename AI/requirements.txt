@@ -15,3 +15,4 @@ pypdf>=5.1.0
 tavily-python>=0.5.0
 beautifulsoup4>=4.12.3
 PyPDF2>=3.0.1
+keybert>=0.8.5
