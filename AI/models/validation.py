@@ -14,6 +14,16 @@ from io import StringIO
 from typing import List
 
 from dotenv import load_dotenv
+from langchain_core.prompts import ChatPromptTemplate
+
+import sys
+import os
+
+# Add the parent directory of 'services' to the path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from dotenv import load_dotenv
+from models import SearchAgent
 
 
 class VerboseAgentExecutor(AgentExecutor):
@@ -109,12 +119,23 @@ class ValidationAgent:
                 x["intermediate_steps"]
             ),})
 
+    def summarize_text(document):
+            chat = ChatGroq(temperature=0, model_name="llama3-8b-8192")
+            system = """You are a helpful assistant. Your task is to review a document and provide a detailed summary of its content. 
+                        Focus on capturing the main ideas, key points, and important details in a concise manner.
+                        Ensure the summary is no more than 50 words and remains true to the original intent and information of the document."""
+            human = """Summarize the following document in no more than 50 words, focusing on the main ideas and key points:
+                    {document}"""
+            prompt = ChatPromptTemplate.from_messages([("system", system), ("human", human)])
+            
+            summarize_agent = prompt | chat
+            return summarize_agent.invoke({"document": document})
+
     def validate_document(self, processed_pages : List[str]) -> dict:
         batch_size = 1
         num_batches = ceil(len(processed_pages) / batch_size)
         results = []
-        
-        # TODO: ADD SERVICE TO GET REFERENCE DOCUMENTS
+        searching_engine = SearchAgent()  
 
         for batch_index in range(num_batches):
             # Slice the pages into a batch of three
@@ -124,12 +145,30 @@ class ValidationAgent:
             
             # Combine the pages in the batch into one text block
             batched_text = "\n".join(page_batch)
+
+            summary = self.summarize_text(batched_text).content
+
+            summary = summary.split("\n",1)[1]
+            search_query = summary + "Search for four titles of scholarly documents and the author/organization writing them most related to the summary above."
+            search_result = searching_engine.invoke_search(search_query, max_results=4)
+
+            urls = ""
             
-            # Process the batched text
-            result = {
-                "page_id" : batch_index,
-                "suggestions" : self.process_page(batched_text, reference_documents)["output"]
-            }
+            for i, result in enumerate(search_result):
+                if (result.url != None) and (i != 0):
+                    urls += f"[{i}] {result.url}\n"
+
+            if urls.strip() == "":
+                result = {
+                    "page_id" : batch_index,
+                    "suggestions" : "No available resources for comparison"
+                }
+            else:
+                result = self.process_page(batched_text, urls)
+                result = {
+                    "page_id" : batch_index,
+                    "suggestions" : self.process_page(batched_text, urls)["output"]
+                }            
 
             results.append(result)
         
