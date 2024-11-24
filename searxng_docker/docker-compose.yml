@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  searxng:
+    image: searxng/searxng
+    container_name: searxng
+    ports:
+      - "8888:8080"
+    volumes:
+      - ./searxng:/etc/searxng
+    environment:
+      - BASE_URL=http://localhost:8888/
+      - INSTANCE_NAME=my-searxng-instance
+    restart: unless-stopped
