@@ -1,5 +1,5 @@
 from fastapi import UploadFile
-from models.revision import RevisionAgent
+from models import RevisionAgent
 from typing import List
 import pymupdf
 
