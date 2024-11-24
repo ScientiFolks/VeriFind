@@ -8,7 +8,6 @@ from langchain.agents.format_scratchpad.openai_tools import (
 )
 from math import ceil
 from langchain_community.tools.tavily_search import TavilySearchResults
-from services import VerboseAgentExecutor, ValidationService
 from contextlib import redirect_stdout
 from langchain.agents import AgentExecutor
 from io import StringIO
@@ -114,6 +113,8 @@ class ValidationAgent:
         batch_size = 1
         num_batches = ceil(len(processed_pages) / batch_size)
         results = []
+        
+        # TODO: ADD SERVICE TO GET REFERENCE DOCUMENTS
 
         for batch_index in range(num_batches):
             # Slice the pages into a batch of three
@@ -127,7 +128,7 @@ class ValidationAgent:
             # Process the batched text
             result = {
                 "page_id" : batch_index,
-                "suggestions" : self.process_pages(batched_text)["output"]
+                "suggestions" : self.process_page(batched_text, reference_documents)["output"]
             }
 
             results.append(result)
