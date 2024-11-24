@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
+import { searchLiterature } from '../../services/api';
 import 'react-toastify/dist/ReactToastify.css';
 
 function Find() {
@@ -20,7 +21,7 @@ function Find() {
         setResultCount(parseInt(e.target.value));
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (searchText.trim() === '') {
             toast.error('Please enter a search query', {
                 position: "top-center",
@@ -37,69 +38,14 @@ function Find() {
         setIsSubmitted(true);
         setIsLoading(true);
 
-        // Change this to actual backend request
-        // Simulate backend request
-        setTimeout(() => {
-            setIsLoading(false);
-            // Handle search query to backend
-            console.log('Searching for:', searchText);
-            console.log('Show total results:', resultCount);
-
-            // Simulated search results
-            const results = [
-                {
-                title: "Literature Review and Document Refinement: Ensuring Accuracy and Relevance",
-                link: "https://example.com/literature-review",
-                summary: "This article discusses techniques for validating sources and revising documents to enhance research quality."
-                },
-                {
-                title: "Improving Research Quality: Literature Validation and Document Revision Techniques",
-                link: "https://example.com/research-quality",
-                summary: "An in-depth look at methods for ensuring research integrity through comprehensive validation of literature and revision of academic documents."
-                },
-                {
-                title: "VeriDraft: An Intelligent Assistant for Validating Sources and Revising Drafts",
-                link: "https://example.com/veridraft",
-                summary: "VeriDraft is a smart platform that helps researchers validate literature sources and refine their document drafts."
-                },
-                {
-                title: "Literature Review and Document Refinement: Ensuring Accuracy and Relevance",
-                link: "https://example.com/literature-review",
-                summary: "This article discusses techniques for validating sources and revising documents to enhance research quality."
-                },
-                {
-                title: "Improving Research Quality: Literature Validation and Document Revision Techniques",
-                link: "https://example.com/research-quality",
-                summary: "An in-depth look at methods for ensuring research integrity through comprehensive validation of literature and revision of academic documents."
-                },
-                {
-                title: "VeriDraft: An Intelligent Assistant for Validating Sources and Revising Drafts",
-                link: "https://example.com/veridraft",
-                summary: "VeriDraft is a smart platform that helps researchers validate literature sources and refine their document drafts."
-                },
-                {
-                title: "Literature Review and Document Refinement: Ensuring Accuracy and Relevance",
-                link: "https://example.com/literature-review",
-                summary: "This article discusses techniques for validating sources and revising documents to enhance research quality."
-                },
-                {
-                title: "Improving Research Quality: Literature Validation and Document Revision Techniques",
-                link: "https://example.com/research-quality",
-                summary: "An in-depth look at methods for ensuring research integrity through comprehensive validation of literature and revision of academic documents."
-                },
-                {
-                title: "VeriDraft: An Intelligent Assistant for Validating Sources and Revising Drafts",
-                link: "https://example.com/veridraft",
-                summary: "VeriDraft is a smart platform that helps researchers validate literature sources and refine their document drafts."
-                },
-                {
-                    title: "VeriDraft: An Intelligent Assistant for Validating Sources and Revising Drafts",
-                    link: "https://example.com/veridraft",
-                    summary: "VeriDraft is a smart platform that helps researchers validate literature sources and refine their document drafts."
-                },
-            ].slice(0, resultCount);
+        try {
+            const results = await searchLiterature(searchText, resultCount);
             setSearchResults(results);
-        }, 2000); // Simulate 2 seconds loading time
+        } catch (error) {
+            toast.error('An error occurred while fetching results. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleKeyPress = (e) => {
