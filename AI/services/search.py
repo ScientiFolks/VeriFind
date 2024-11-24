@@ -4,7 +4,6 @@ from configs import SearchConfig
 class SearchService:
     def __init__(self) -> None:
         self.search_agent = SearchAgent()
-        pass
 
     async def search(
         self,

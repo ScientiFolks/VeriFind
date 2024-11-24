@@ -8,9 +8,36 @@ from langchain.agents.format_scratchpad.openai_tools import (
 )
 from math import ceil
 from langchain_community.tools.tavily_search import TavilySearchResults
-from services import VerboseAgentExecutor, ValidationService
+from contextlib import redirect_stdout
+from langchain.agents import AgentExecutor
+from io import StringIO
+from typing import List
 
 from dotenv import load_dotenv
+from langchain_core.prompts import ChatPromptTemplate
+
+from dotenv import load_dotenv
+from models import SearchAgent
+
+
+class VerboseAgentExecutor(AgentExecutor):
+    def invoke(self, inputs):
+        verbose_output = StringIO()
+        
+        # Redirect verbose output to a string
+        with redirect_stdout(verbose_output):
+            result = super().invoke(inputs)
+        
+        # Capture verbose output
+        verbose_text = verbose_output.getvalue()
+        
+        # Append verbose output to the result
+        if isinstance(result, dict) and "output" in result:
+            result["output"] += f"\n\nVerbose Output:\n{verbose_text}"
+        else:
+            result = {"output": f"Verbose Output:\n{verbose_text}"}
+        
+        return result
 
 class ValidationAgent:
     def __init__(self):
@@ -19,15 +46,6 @@ class ValidationAgent:
 
         load_dotenv()
 
-        self.doc = pymupdf.open("models/TextPreprocessingApproachesinCNNforDisasterReportsDataset.pdf")
-
-        self.processed_pages = []
-
-        self.result = None
-
-        for page_id in range (self.doc.page_count):
-            self.processed_pages.append(self.doc.load_page(page_id).get_text())
-        
         # Define your tool(s)
         self.tavily_tool = TavilySearchResults(
                                             max_results=3,
@@ -67,7 +85,7 @@ class ValidationAgent:
         self.agent = create_react_agent(self.llm, self.tools, self.prompt_template)
         self.agent_executor = VerboseAgentExecutor(agent=self.agent, tools=self.tools, verbose=True, max_iterations=2, handle_parsing_errors=True)
     
-    def process_page(self, page_content):
+    def process_page(self, page_content, reference_documents):
         prompt = f"""
         Analyze the following document text:
 
@@ -75,11 +93,7 @@ class ValidationAgent:
 
         1. Compare it to these three scholarly works:
 
-        [1] Multi-label disaster text classification via supervised contrastive learning for social media data. Computers and Electrical Engineering 104 (2022), 108401.
-
-        [2] In Proceedings of the International Conference Recent Advances in Natural Language Processing (RANLP'17). 716-722. Google Scholar
-
-        [3] Zahra Ashktorab et al., "LR-TED: A Hybrid Approach for Disaster Text Classification", 2020.
+        {reference_documents}
 
         2. Highlight:
             - Areas of agreement
@@ -99,28 +113,51 @@ class ValidationAgent:
                 x["intermediate_steps"]
             ),})
 
-    def output_page(self, page_content):
-        batch_size = 3
-        num_batches = ceil(len(self.processed_pages) / batch_size)
+    def summarize_text(self, document):
+            chat = ChatGroq(temperature=0, model_name="llama3-8b-8192")
+            system = """You are a helpful assistant. Your task is to review a document and provide a detailed summary of its content. 
+                        Focus on capturing the main ideas, key points, and important details in a concise manner.
+                        Ensure the summary is no more than 5 words and remains true to the original intent and information of the document."""
+            human = """Summarize the following document in no more than 5 words, focusing on the main ideas and key points:
+                    {document}"""
+            prompt = ChatPromptTemplate.from_messages([("system", system), ("human", human)])
+            
+            summarize_agent = prompt | chat
+            return summarize_agent.invoke({"document": document})
 
-        for batch_index in range(num_batches):
+    def validate_document(self, processed_pages : List[str]) -> dict:
+        results = []
+        searching_engine = SearchAgent()  
+
+        for batch_index in range(len(processed_pages)):
             # Slice the pages into a batch of three
-            start_index = batch_index * batch_size
-            end_index = start_index + batch_size
-            page_batch = self.processed_pages[start_index:end_index]
-            
-            # Combine the pages in the batch into one text block
-            batched_text = "\n".join(page_batch)
-            
-            # Process the batched text
-            #print(f"Processing batch {batch_index + 1} (Pages {start_index + 1} to {min(end_index, len(processed_pages))})")
-            self.result = self.processed_pages(batched_text)
-            
-            # Print the result for the batch
-            print("================================================================")
+            batched_text = processed_pages[batch_index]
 
-            break
+            summary = self.summarize_text(batched_text).content
+            print(summary)
+            
+            search_query = summary + "Search for four titles of scholarly documents and the author/organization writing them most related to the summary above."
+            search_result = searching_engine.invoke_search(search_query, max_results=4)
 
-    def print_final_output(self):
-        val_service = ValidationService()
-        print(val_service.remove_lines_before_substring((val_service.clean_output(self.result["output"])), "Comparison with Scholarly Works"))
+            urls = ""
+            print(search_result)
+            
+            for i, result in enumerate(search_result):
+                if (result.url != None) and (i != 0):
+                    urls += f"[{i}] {result.url}\n"
+
+            if urls.strip() == "":
+                result = {
+                    "page_id" : batch_index,
+                    "suggestions" : "No available resources for comparison"
+                }
+            else:
+                result = self.process_page(batched_text, urls)
+                result = {
+                    "page_id" : batch_index,
+                    "suggestions" : self.process_page(batched_text, urls)["output"]
+                }            
+
+            results.append(result)
+        
+        return results
