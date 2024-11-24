@@ -40,7 +40,7 @@ function Find() {
 
         try {
             const results = await searchLiterature(searchText, resultCount);
-            setSearchResults(results);
+            setSearchResults(results.data);
         } catch (error) {
             toast.error('An error occurred while fetching results. Please try again.');
         } finally {
@@ -55,15 +55,15 @@ function Find() {
         }
     };
 
-    const LiteratureItem = ({ title, link, summary }) => (
+    const LiteratureItem = ({ title, url, summarized_text }) => (
         <div className="mb-8 md:mb-12">
             <h3 className="text-xl md:text-2xl font-bold text-yellow-fig hover:text-gray-2 transition-colors duration-300">
-                <a href={link} target="_blank" rel="noopener noreferrer">{title}</a>
+                <a href={url} target="_blank" rel="noopener noreferrer">{title}</a>
             </h3>
             <p className="text-green-500 text-xs md:text-sm mb-1 hover:underline">
-                <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
+                <a href={url} target="_blank" rel="noopener noreferrer">{url}</a>
             </p>
-            <p className="text-gray-2 text-sm md:text-base">{summary}</p>
+            <p className="text-gray-2 text-sm md:text-base">{summarized_text}</p>
         </div>
     );
     
