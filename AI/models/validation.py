@@ -13,13 +13,13 @@ from services import VerboseAgentExecutor, ValidationService
 from dotenv import load_dotenv
 
 class ValidationAgent:
-    def __init__(self):
+    def __init__(self, data_path):
         # Initialize your language model
         self.llm = ChatGroq(model_name="llama3-70b-8192")
 
         load_dotenv()
 
-        self.doc = pymupdf.open("models/TextPreprocessingApproachesinCNNforDisasterReportsDataset.pdf")
+        self.doc = pymupdf.open(data_path)
 
         self.processed_pages = []
 
@@ -99,7 +99,7 @@ class ValidationAgent:
                 x["intermediate_steps"]
             ),})
 
-    def output_page(self, page_content):
+    def output_page(self):
         batch_size = 3
         num_batches = ceil(len(self.processed_pages) / batch_size)
 
