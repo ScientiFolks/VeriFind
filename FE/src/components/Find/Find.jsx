@@ -10,6 +10,7 @@ function Find() {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
 
     const handleInputChange = (e) => {
         setSearchText(e.target.value);
@@ -18,7 +19,8 @@ function Find() {
     };
 
     const handleResultCountChange = (e) => {
-        setResultCount(parseInt(e.target.value));
+        const value = parseInt(e.target.value);
+        setResultCount(Math.min(Math.max(value, 1), 100));
     };
 
     const handleSubmit = async () => {
@@ -37,6 +39,7 @@ function Find() {
 
         setIsSubmitted(true);
         setIsLoading(true);
+        setCurrentPage(1);
 
         try {
             const results = await searchLiterature(searchText, resultCount);
@@ -67,13 +70,38 @@ function Find() {
         </div>
     );
     
-    const LiteratureResults = ({ results }) => (
-        <div className="mt-8 md:mt-12 px-2 md:px-4 w-full max-w-full overflow-x-hidden">
-            {results.map((item, index) => (
-                <LiteratureItem key={index} {...item} />
-            ))}
-        </div>
-    );
+    const LiteratureResults = ({ results }) => {
+        const startIndex = (currentPage - 1) * 10;
+        const endIndex = startIndex + 10;
+        const currentResults = results.slice(startIndex, endIndex);
+
+        return (
+            <div className="mt-8 md:mt-12 px-2 md:px-4 w-full max-w-full overflow-x-hidden">
+                {currentResults.map((item, index) => (
+                    <LiteratureItem key={index} {...item} />
+                ))}
+                <Pagination totalPages={Math.ceil(results.length / 10)} />
+            </div>
+        );
+    };
+
+    const Pagination = ({ totalPages }) => {
+        if (totalPages <= 1) return null;
+
+        return (
+            <div className="flex justify-center mt-8">
+                {[...Array(totalPages)].map((_, index) => (
+                    <button
+                        key={index}
+                        onClick={() => setCurrentPage(index + 1)}
+                        className={`mx-1 px-3 py-1 rounded ${currentPage === index + 1 ? 'bg-yellow-fig text-white' : 'bg-gray-2'}`}
+                    >
+                        {index + 1}
+                    </button>
+                ))}
+            </div>
+        );
+    };
 
     return (
         <div className={`flex flex-col items-center w-full transition-all duration-300 ${isSubmitted ? 'pt-4' : 'pt-8 md:pt-16'}`}>
@@ -103,20 +131,21 @@ function Find() {
                 </div>
                 <div className={`flex justify-end items-center transition-all duration-300 ${isSubmitted ? 'md:mr-4' : 'w-full mt-2 md:mt-4 max-w-2xl'}`}>
                     <span className="mr-2 text-gray-2 text-sm md:text-base">Show total results:</span>
-                    <select
+                    <input
+                        type="number"
                         value={resultCount}
                         onChange={handleResultCountChange}
-                        className="px-2 py-1 md:px-3 md:py-2 border border-gray-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-fig text-sm md:text-base"
+                        onKeyDown={handleKeyPress}
+                        min="1"
+                        max="100"
+                        className="px-2 py-1 md:px-3 md:py-2 border border-gray-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-fig text-sm md:text-base w-20"
                         disabled={isLoading}
-                    >
-                        {[...Array(10)].map((_, i) => (
-                            <option key={i+1} value={i+1}>
-                                {i+1}
-                            </option>
-                        ))}
-                    </select>
+                    />
                 </div>
             </div>
+            {resultCount > 10 && (
+                <p className="text-gradient-1 text-xs md:text-sm mt-4 text-center transition-all duration-300">Warning: Searching for more than 10 results may take significantly longer.</p>
+            )}
             {isLoading && (
                 <div className="mt-12 flex justify-center items-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-fig"></div>
