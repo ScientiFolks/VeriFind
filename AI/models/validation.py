@@ -67,7 +67,7 @@ class ValidationAgent:
         self.agent = create_react_agent(self.llm, self.tools, self.prompt_template)
         self.agent_executor = VerboseAgentExecutor(agent=self.agent, tools=self.tools, verbose=True, max_iterations=2, handle_parsing_errors=True)
     
-    def process_page(self, page_content):
+    def process_page(self, page_content, reference_documents):
         prompt = f"""
         Analyze the following document text:
 
@@ -75,11 +75,7 @@ class ValidationAgent:
 
         1. Compare it to these three scholarly works:
 
-        [1] Multi-label disaster text classification via supervised contrastive learning for social media data. Computers and Electrical Engineering 104 (2022), 108401.
-
-        [2] In Proceedings of the International Conference Recent Advances in Natural Language Processing (RANLP'17). 716-722. Google Scholar
-
-        [3] Zahra Ashktorab et al., "LR-TED: A Hybrid Approach for Disaster Text Classification", 2020.
+        {reference_documents}
 
         2. Highlight:
             - Areas of agreement
