@@ -37,10 +37,10 @@ function VerifyInputText() {
       }
     };
     
-    // const [summary, setSummary] = useState("Here is a summary of the suggestions for improvement for each page:\n\n**Page 1**\n\n* The title could be more specific and descriptive.\n* The author profiles are standard and do not require changes.\n* The sentence \"All content following this page was uploaded by Yuyun Wabula on 09 June 2023.\" is unclear and could be rephrased.\n* The sentence \"The user has requested enhancement of the downloaded file.\" is unclear and could be rephrased.\n\n**Page 2**\n\n* The introduction could be more concise and focused on the main research question.\n* The related work section could be more organized and focused on the specific research question.\n* The transition between sections could be smoother.\n* The writing could be more concise and focused on the main research question.\n\n**Page 3**\n\n* The introduction could be improved by providing a clearer overview of the research and its significance.\n* The methodology section could be improved by providing a clearer explanation of the data collection and preprocessing techniques used.\n* The results section could be improved by providing a clearer summary of the findings and how they relate to the research question.\n\n**Page 4**\n\n* The introduction could be more concise and clear.\n* The proposed annotation approach could be more specific and clear.\n* The CNN algorithm could be more clearly explained.\n* The experimental setup could be more concise and clear.\n\n**Page 5**\n\n* The introduction could be more concise and focused.\n* The discussion section could be more concise and varied.\n* The tables and figures could be more clearly labeled and explained.\n* The study could benefit from more visual aids.\n\n**Page 6**\n\n* The conclusion could be more explicit about the implications of the results.\n* The transition between the two paragraphs could be smoother.\n\nOverall, the writing is clear and concise, but there are some minor areas for improvement in terms of sentence structure and clarity.");
     const [summary, setSummary] = useState(a.data.summary);
     const [suggestions, setSuggestions] = useState(a.data.suggestions);
 
+    const [showSuggestions, setShowSuggestions] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     const [text, setText] = useState('');
@@ -54,6 +54,10 @@ function VerifyInputText() {
       adjustTextareaHeight();
     }, [text]);
   
+    const toggleSuggestions = () => {
+      setShowSuggestions(!showSuggestions);
+    };
+
     const adjustTextareaHeight = () => {
       const textarea = textareaRef.current;
       textarea.style.height = 'auto';
@@ -206,16 +210,25 @@ function VerifyInputText() {
               </div>
             </div>
 
-            <p className='text-yellow-fig text-xl font-bold mb-5'>Suggestions</p>
+            {suggestions.length !== 0 && 
+              <>
+                <button 
+                  className='text-yellow-fig hover:text-gradient-3 text-xl font-bold mb-5'
+                  onClick={toggleSuggestions}
+                >
+                  {showSuggestions ? 'Hide Suggestions' : 'Show Suggestions'}
+                </button>
 
-            {suggestions.map((item, index) => (
-              <div key={index} className='mb-10'>
-                <p className='text-yellow-fig text-xl font-bold mb-5'>Page {item.page_id + 1}</p>
-                <div className='bg-white whitespace-pre-wrap p-5 rounded-3xl'>
-                  <BoldText text={item.suggestions} />
-                </div>
-              </div>  
-            ))};
+                {showSuggestions && suggestions.map((item, index) => (
+                  <div key={index} className='mb-10'>
+                    <p className='text-yellow-fig text-xl font-bold mb-5'>Page {item.page_id + 1}</p>
+                    <div className='bg-white whitespace-pre-wrap p-5 rounded-3xl'>
+                      <BoldText text={item.suggestions} />
+                    </div>
+                  </div>  
+                ))};
+              </>
+            }
           </>
         )}
       </>
