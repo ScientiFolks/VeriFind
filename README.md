@@ -78,7 +78,7 @@ VeriFind
 
 ```
 
-## Projecet Description
+## Project Description
 
 Project VeriFind is a web application that enables users to search academic literature and validate research documents with ease. The application provides advanced search functionality with customizable result counts, real-time search with loading states, paginated results, and a responsive search interface. Users can upload PDF documents for validation, view a general summary of the document analysis, and receive page-by-page suggestions for improvement. The application also includes a warning system for large result sets and a statement validation feature. VeriFind is built using React, FastAPI, LangChain, and Groq.
 
