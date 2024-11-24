@@ -83,4 +83,26 @@ export const verifyStatement = async (statement) => {
   }
 }
 
+export const validateDocument = async (document) => {
+  try {
+    const formData = new FormData();
+    formData.append('file', document);
+
+    const response = await api.post('/validation/pdf', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    if (response.status === 200 && response.data) {
+      return response.data;
+    } else {
+      throw new Error("Error uploading PDF");
+    }
+  } catch (error) {
+    console.error("Error uploading PDF:", error);
+    throw error;
+  }
+}
+
 export default api;

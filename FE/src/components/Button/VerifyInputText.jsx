@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import upload_icon from '../../assets/icons/upload.svg'
 import BoldText from '../Text/BoldText';
 import SuggestionsPagination from '../Pagination/SuggestionsPagination';
-import { verifyDocument, verifyStatement } from '../../services/api';
+import { verifyDocument, verifyStatement, validateDocument } from '../../services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -15,11 +15,14 @@ function VerifyInputText() {
 
     // Validation output
     const [summary, setSummary] = useState("");
+    const [validationSummary, setValidationSummary] = useState("");
     const [suggestions, setSuggestions] = useState("");
+    const [validationSuggestions, setValidationSuggestions] = useState("");
 
     // UI State
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoading2, setIsLoading2] = useState(false);
     const [isUploaded, setIsUploaded] = useState(false);
     
     // Ref
@@ -106,6 +109,10 @@ function VerifyInputText() {
         });
       }
       else {
+        setSummary("");
+        setValidationSummary("");
+        setSuggestions("");
+        setValidationSuggestions("");
         setIsLoading(true);
         
         if (pdfFile) {
@@ -113,6 +120,28 @@ function VerifyInputText() {
             console.log("Response:", result);
             setSummary(result.data.summary);
             setSuggestions(result.data.suggestions);
+
+            setIsLoading2(true);
+            validateDocument(pdfFile).then(result => {
+              console.log("Response:", result);
+              setValidationSummary(result.data.summary);
+              setValidationSuggestions(result.data.suggestions);
+            })
+            .catch(error => {
+              console.error("Error:", error);
+              toast.error('Error', {
+                position: "top-center",
+                autoClose: false,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+              });
+            })
+            .finally(() => {
+              setIsLoading2(false);
+            });
           })
           .catch(error => {
             console.error("Error:", error);
@@ -252,12 +281,25 @@ function VerifyInputText() {
           <>
             <div className='mb-10'>
               <p className='text-yellow-fig text-xl font-bold mb-5'>General Summary</p>
-              <div className='bg-white whitespace-pre-wrap p-5 rounded-3xl'>
+              <div className='bg-white whitespace-pre-wrap p-5 rounded-3xl mb-5'>
                   <BoldText text={summary} />
               </div>
+
+              {isUploaded && isLoading2 && (
+                <div className="mt-12 flex justify-center items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-fig"></div>
+                </div>
+              )}
+
+              {isUploaded && !isLoading2 && (
+                <div className='bg-white whitespace-pre-wrap p-5 rounded-3xl'>
+                  <BoldText text={validationSummary} />
+                </div>
+              )}
+
             </div>
 
-            {suggestions.length !== 0 && 
+            {suggestions.length !== 0 && isUploaded &&
               <>
                 <button 
                   className='text-yellow-fig hover:text-gradient-3 text-xl font-bold mb-5'
@@ -265,7 +307,7 @@ function VerifyInputText() {
                 >
                   {showSuggestions ? 'Hide Suggestions' : 'Show Suggestions'}
                 </button>
-                <SuggestionsPagination suggestions={suggestions} showSuggestions={showSuggestions} />
+                <SuggestionsPagination suggestions={suggestions} validationSuggestions={validationSuggestions} showSuggestions={showSuggestions} />
               </>
             }
           </>
