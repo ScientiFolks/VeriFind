@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import { searchLiterature } from '../../services/api';
+import LiteratureDetail from './LiteratureDetail';
 import 'react-toastify/dist/ReactToastify.css';
 
 function Find() {
@@ -11,6 +12,15 @@ function Find() {
     const [isLoading, setIsLoading] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [selectedLiterature, setSelectedLiterature] = useState(null);
+
+    const handleLiteratureClick = (literature) => {
+        setSelectedLiterature(literature);
+    };
+
+    const handleBack = () => {
+        setSelectedLiterature(null);
+    };
 
     const handleInputChange = (e) => {
         setSearchText(e.target.value);
@@ -60,25 +70,29 @@ function Find() {
 
     const LiteratureItem = ({ title, url, summarized_text }) => {
         const [isExpanded, setIsExpanded] = useState(false);
-        const maxLength = 200; // Maximum number of characters to show initially
-        
+        const maxLength = 200;
+
         const toggleExpand = () => {
             setIsExpanded(!isExpanded);
         };
-    
+
         const truncatedText = summarized_text.slice(0, maxLength);
         const shouldTruncate = summarized_text.length > maxLength;
-    
+
         return (
             <div className="mb-8 md:mb-12">
-                <h3 className="text-xl md:text-2xl font-bold text-yellow-fig hover:text-gray-2 transition-colors duration-300">
-                    <a href={url} target="_blank" rel="noopener noreferrer">{title}</a>
+                <h3 
+                    className="text-xl md:text-2xl font-bold text-yellow-fig hover:text-gray-2 transition-colors duration-300 cursor-pointer"
+                    onClick={() => handleLiteratureClick({ title, url, summarized_text })}
+                >
+                    {title}
                 </h3>
                 <p className="text-green-500 text-xs md:text-sm mb-1 hover:underline">
                     <a href={url} target="_blank" rel="noopener noreferrer">{url}</a>
                 </p>
-                <div className="text-gray-2 text-sm md:text-base">
-                    <p>{isExpanded ? summarized_text : truncatedText}
+                <div className="text-gray-2 text-sm md:text-base text-justify">
+                    <p>
+                        {isExpanded ? summarized_text : truncatedText}
                         {shouldTruncate && (
                             <>
                                 {!isExpanded && '...'}
@@ -95,7 +109,7 @@ function Find() {
             </div>
         );
     };
-    
+
     const LiteratureResults = ({ results }) => {
         const startIndex = (currentPage - 1) * 10;
         const endIndex = startIndex + 10;
@@ -132,53 +146,66 @@ function Find() {
     return (
         <div className={`flex flex-col items-center w-full transition-all duration-300 ${isSubmitted ? 'pt-4' : 'pt-8 md:pt-16'}`}>
             <ToastContainer />
-            <div className={`w-full flex flex-col items-center ${isSubmitted ? 'md:flex-row md:justify-between md:items-start md:gap-6' : ''} transition-all duration-300`}>
-                <h1 className={`font-black bg-gradient-to-r from-gradient-1 via-gradient-2 to-gradient-3 text-transparent bg-clip-text transition-all duration-300 ${isSubmitted ? 'text-4xl mb-4 md:mb-0 md:ml-4' : 'text-6xl md:text-6xl lg:text-8xl mb-4 md:mb-8'}`}>
-                    VeriFind
-                </h1>
-                {!isSubmitted && (
-                    <h2 className="text-center md:text-xl text-base text-gray-2 mb-4 md:mb-8 transition-all duration-300">Discover Relevant Research with Ease</h2>
-                )}
-                <div className={`relative w-full ${isSubmitted ? 'md:w-1/2 md:max-w-xl' : 'max-w-2xl'} transition-all duration-300 mb-4 md:mb-0`}>
-                    <textarea
-                        value={searchText}
-                        onChange={handleInputChange}
-                        onKeyDown={handleKeyPress}
-                        placeholder="Search for research papers..."
-                        className="w-full px-4 py-2 pl-10 pr-4 rounded-2xl border border-gray-2 focus:outline-none focus:ring-2 focus:ring-yellow-fig resize-none overflow-hidden"
-                        rows="1"
-                        style={{ minHeight: '40px' }}
-                        disabled={isLoading}
-                    />
-                    <FaSearch 
-                        className={`absolute left-3 top-3 text-gray-1 ${isLoading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                        onClick={isLoading ? null : handleSubmit}
-                    />
-                </div>
-                <div className={`flex justify-end items-center transition-all duration-300 ${isSubmitted ? 'md:mr-4' : 'w-full mt-2 md:mt-4 max-w-2xl'}`}>
-                    <span className="mr-2 text-gray-2 text-sm md:text-base">Show total results:</span>
-                    <input
-                        type="number"
-                        value={resultCount}
-                        onChange={handleResultCountChange}
-                        onKeyDown={handleKeyPress}
-                        min="1"
-                        max="100"
-                        className="px-2 py-1 md:px-3 md:py-2 border border-gray-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-fig text-sm md:text-base w-20"
-                        disabled={isLoading}
-                    />
-                </div>
-            </div>
-            {resultCount > 10 && (
-                <p className="text-gradient-1 text-xs md:text-sm mt-4 text-center transition-all duration-300">Warning: Searching for more than 10 results may take significantly longer.</p>
-            )}
-            {isLoading && (
-                <div className="mt-12 flex justify-center items-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-fig"></div>
-                </div>
-            )}
-            {!isLoading && isSubmitted && searchResults.length > 0 && (
-                <LiteratureResults results={searchResults} />
+            {selectedLiterature ? (
+                <LiteratureDetail 
+                    literature={selectedLiterature}
+                    onBack={handleBack}
+                />
+            ) : (
+                <>
+                    <div className={`w-full flex flex-col items-center ${isSubmitted ? 'md:flex-row md:justify-between md:items-start md:gap-6' : ''} transition-all duration-300`}>
+                        <h1 className={`font-black bg-gradient-to-r from-gradient-1 via-gradient-2 to-gradient-3 text-transparent bg-clip-text transition-all duration-300 ${isSubmitted ? 'text-4xl mb-4 md:mb-0 md:ml-4' : 'text-6xl md:text-6xl lg:text-8xl mb-4 md:mb-8'}`}>
+                            VeriFind
+                        </h1>
+                        {!isSubmitted && (
+                            <h2 className="text-center md:text-xl text-base text-gray-2 mb-4 md:mb-8 transition-all duration-300">
+                                Discover Relevant Research with Ease
+                            </h2>
+                        )}
+                        <div className={`relative w-full ${isSubmitted ? 'md:w-1/2 md:max-w-xl' : 'max-w-2xl'} transition-all duration-300 mb-4 md:mb-0`}>
+                            <textarea
+                                value={searchText}
+                                onChange={handleInputChange}
+                                onKeyDown={handleKeyPress}
+                                placeholder="Search for research papers..."
+                                className="w-full px-4 py-2 pl-10 pr-4 rounded-2xl border border-gray-2 focus:outline-none focus:ring-2 focus:ring-yellow-fig resize-none overflow-hidden"
+                                rows="1"
+                                style={{ minHeight: '40px' }}
+                                disabled={isLoading}
+                            />
+                            <FaSearch 
+                                className={`absolute left-3 top-3 text-gray-1 ${isLoading ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                                onClick={isLoading ? null : handleSubmit}
+                            />
+                        </div>
+                        <div className={`flex justify-end items-center transition-all duration-300 ${isSubmitted ? 'md:mr-4' : 'w-full mt-2 md:mt-4 max-w-2xl'}`}>
+                            <span className="mr-2 text-gray-2 text-sm md:text-base">Show total results:</span>
+                            <input
+                                type="number"
+                                value={resultCount}
+                                onChange={handleResultCountChange}
+                                onKeyDown={handleKeyPress}
+                                min="1"
+                                max="100"
+                                className="px-2 py-1 md:px-3 md:py-2 border border-gray-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-fig text-sm md:text-base w-20"
+                                disabled={isLoading}
+                            />
+                        </div>
+                    </div>
+                    {resultCount > 10 && (
+                        <p className="text-gradient-1 text-xs md:text-sm mt-4 text-center transition-all duration-300">
+                            Warning: Searching for more than 10 results may take significantly longer.
+                        </p>
+                    )}
+                    {isLoading && (
+                        <div className="mt-12 flex justify-center items-center">
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-fig"></div>
+                        </div>
+                    )}
+                    {!isLoading && isSubmitted && searchResults.length > 0 && (
+                        <LiteratureResults results={searchResults} />
+                    )}
+                </>
             )}
         </div>
     );
