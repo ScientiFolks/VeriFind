@@ -1,5 +1,7 @@
 # VeriFind
 
+![alt text](./Images/logo.png)
+
 A repository for VeriFind App
 A React-based web application that enables users to search academic literature and validate research documents with ease.
 
@@ -352,8 +354,15 @@ GPU instances for NLP models during document validation. Other libraries are als
 ## Development Team
 
 ScientiFolks
-| Name | Github |
 
-| Akmal Mahardika Nurwahyu Pramta## License
+|              Name             |                    GitHub                     |
+| ----------------------------- | --------------------------------------------- |
+| Akmal Mahardika N.P.          | [akmaldika](https://github.com/akmaldika)     |
+| Ghazi Akmal Fauzan            | [ghaziakmalf](https://github.com/ghaziakmalf) |
+| Muhammad Equilibrie Fajria    | [MuhLibri](https://github.com/MuhLibri)       |
+| Muhammad Fadhil Amri          | [Mehmed13](https://github.com/Mehmed13)       |
+| Muhammad Farrel D.R.          | [Breezy-DR](https://github.com/Breezy-DR)     |
 
-MIT License
+## License
+
+[MIT License](https://github.com/ScientiFolks/VeriFind?tab=MIT-1-ov-file)
