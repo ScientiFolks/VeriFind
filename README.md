@@ -142,13 +142,9 @@ The application is built using the following technologies:
 
 ## Getting Started
 
----
-
 To get a local copy up and running follow these simple steps.
 
 ### Front End
-
----
 
 1. Clone the repository
 
@@ -196,10 +192,12 @@ npm run preview
 
 ### Back End
 
-## Dependencies
+#### Dependencies
 
 `cd VeriFind/AI/`
 `pip install -r "requirements.txt"`
+
+#### Running the backend
 
 1. Navigate to the project directory
 
